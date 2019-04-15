@@ -81,6 +81,8 @@ func (client *Client) doRequest(opts parameters, dst interface{}) error {
 		req.Header.Add("X-Postmark-Server-Token", client.ServerToken)
 	}
 
+	req.Close = true
+
 	res, err := client.HTTPClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("error executing request - %s", err.Error())
