@@ -55,6 +55,10 @@ func NewClient(serverToken string, accountToken string) *Client {
 }
 
 func (client *Client) doRequest(opts parameters, dst interface{}) error {
+	return client.withRetry(opts, dst, 1)
+}
+
+func (client *Client) withRetry(opts parameters, dst interface{}, retries int) error {
 	url := fmt.Sprintf("%s/%s", client.BaseURL, opts.Path)
 
 	req, err := http.NewRequest(opts.Method, url, nil)
@@ -92,6 +96,11 @@ func (client *Client) doRequest(opts parameters, dst interface{}) error {
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return fmt.Errorf("error reading body - %s", err.Error())
+	}
+	if res.StatusCode == http.StatusGatewayTimeout {
+		if retries > 0 {
+			return client.withRetry(opts, dst, retries-1)
+		}
 	}
 	if err := json.Unmarshal(body, dst); err != nil {
 		return fmt.Errorf("error unmarshalling response %+v - %s - have status %d", body, err.Error(), res.StatusCode)
