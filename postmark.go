@@ -103,7 +103,7 @@ func (client *Client) withRetry(opts parameters, dst interface{}, retries int) e
 		}
 	}
 	if err := json.Unmarshal(body, dst); err != nil {
-		return fmt.Errorf("error unmarshalling response %+v - %s - have status %d", body, err.Error(), res.StatusCode)
+		return fmt.Errorf("error unmarshalling response %s - %s - have status %d", string(body), err.Error(), res.StatusCode)
 	}
 	return nil
 }
